@@ -4,8 +4,8 @@ import os
 from robobrowser import RoboBrowser
 
 # 認証の情報は環境変数から取得する。
-AMAZON_EMAIL = os.environ['FOLIO_EMAIL']
-AMAZON_PASSWORD = os.environ['FOLIO_PASSWORD']
+FOLIO_EMAIL = os.environ['FOLIO_EMAIL']
+FOLIO_PASSWORD = os.environ['FOLIO_PASSWORD']
 
 # RoboBrowserオブジェクトを作成する。
 browser = RoboBrowser(
@@ -16,18 +16,24 @@ browser = RoboBrowser(
 
 
 def main():
+
+    print(os.getenv('TEST'))
+    print(FOLIO_EMAIL)
+    print(FOLIO_PASSWORD)
+
+
     # 注文履歴のページを開く。
     print('Navigating...', file=sys.stderr)
-    browser.open('https://folio-sec.com/mypage/assets')
+    browser.open('https://folio-sec.com/login')
 
     # サインインページにリダイレクトされていることを確認する。
-    assert 'マイページ | フォリオ' in browser.parsed.title.string
+    assert 'ログイン | フォリオ' in browser.parsed.title.string
 
     # name="signIn" というサインインフォームを埋める。
     # フォームのname属性の値はブラウザーの開発者ツールで確認できる。
-    form = browser.get_form(attrs={'name': 'signIn'})
-    form['email'] = AMAZON_EMAIL  # name="email" という入力ボックスを埋める。
-    form['password'] = AMAZON_PASSWORD  # name="password" という入力ボックスを埋める。
+    form = browser.get_form(attrs={'class': 'Login__login--191O7'})
+    form['email'] = FOLIO_EMAIL  # name="email" という入力ボックスを埋める。
+    form['password'] = FOLIO_PASSWORD  # name="password" という入力ボックスを埋める。
 
     # フォームを送信する。正常にログインするにはRefererヘッダーとAccept-Languageヘッダーが必要。
     print('Signing in...', file=sys.stderr)
@@ -37,11 +43,17 @@ def main():
     })
 
     # ログインに失敗する場合は、次の行のコメントを外してHTMLのソースを確認すると良い。
-    # print(browser.parsed.prettify())
+    #print(browser.parsed.prettify())
+
+    # マイページが表示されていることを確認する。
+    print(browser.parsed.title.string)
+    assert 'マイページ | フォリオ' in browser.parsed.title.string  #
+
+    return
 
     # ページャーをたどる。
     while True:
-        assert '注文履歴' in browser.parsed.title.string  # 注文履歴画面が表示されていることを確認する。
+        assert 'マイページ | フォリオ' in browser.parsed.title.string  # 注文履歴画面が表示されていることを確認する。
 
         print_order_history()  # 注文履歴を表示する。
 
